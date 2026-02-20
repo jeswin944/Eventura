@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}My Timetable{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2 class="text-center"><i class="fas fa-calendar-alt me-2"></i>Academic Timetable</h2>
+        <h5 class="text-center text-muted">Semester {{ student.semester }} - {{ student.department }}</h5>
+    </div>
+</div>
+
+<div class="card shadow-sm glass-ui">
+    <div class="card-body">
+        {% if timetable %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Course</th>
+                        <th>Faculty</th>
+                        <th>Room</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in timetable %}
+                    <tr>
+                        <td class="fw-bold">{{ slot.day }}</td>
+                        <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                        <td><span class="badge bg-primary">{{ slot.course_name }}</span></td>
+                        <td>{{ slot.faculty_name }}</td>
+                        <td><span class="badge bg-secondary">{{ slot.classroom }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info text-center">
+            No timetable found for your semester yet.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

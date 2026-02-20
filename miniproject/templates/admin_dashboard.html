@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="text-primary"><i class="fas fa-user-shield me-2"></i>Admin Dashboard</h2>
+        <div class="d-flex align-items-center justify-content-between">
+            <p class="text-muted mb-0">Welcome, <strong>{{ session.get('name', 'Admin') }}</strong>. You have full
+                system control.</p>
+            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                <i class="fas fa-key me-1"></i>Change Password
+            </button>
+        </div>
+    </div>
+</div>
+
+{% if pending_ods > 0 %}
+<div class="alert alert-warning d-flex align-items-center mb-4 fade show glass-panel text-warning border-warning"
+    role="alert">
+    <i class="fas fa-exclamation-triangle me-2 fa-lg"></i>
+    <div>
+        Attention: There are <strong>{{ pending_ods }}</strong> pending On-Duty requests awaiting faculty approval.
+    </div>
+</div>
+{% endif %}
+
+<h4 class="mb-4 text-primary"><i class="fas fa-cogs me-2"></i>Administration Console</h4>
+
+<!-- Event Management -->
+<div class="mb-5">
+    <h5 class="text-secondary border-bottom border-secondary pb-2 mb-3"><i class="fas fa-calendar-alt me-2"></i>Event
+        Management</h5>
+    <div class="row g-3">
+        <!-- Create Event -->
+        <div class="col-6 col-md-3">
+            <a href="#" data-bs-toggle="offcanvas" data-bs-target="#createEventOffcanvas" class="text-decoration-none">
+                <div class="card shadow-sm h-100 border-0 bg-success text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-calendar-plus fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Create Event</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- View Events (Manage) -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('public.events') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-light text-primary hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-calendar-check fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Manage Events</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Approve Certs -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.admin_certificates') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-warning text-dark hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-certificate fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Approve Certs</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Feedbacks -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.admin_feedbacks') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-secondary text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-comments fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Feedbacks</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Management -->
+<div class="mb-5">
+    <h5 class="text-secondary border-bottom border-secondary pb-2 mb-3"><i
+            class="fas fa-graduation-cap me-2"></i>Academic Management</h5>
+    <div class="row g-3">
+        <!-- Manage Courses -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.manage_courses') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-info text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-book fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Courses</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Manage Timetable -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.manage_timetable') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-primary text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-clock fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Timetable</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Manage Exams -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.admin_exams') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-secondary text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-edit fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Exams</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- On-Duty Requests -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.admin_onduty') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-warning text-dark hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-clipboard-check fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">On-Duty Requests</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- System Administration -->
+<div class="mb-5">
+    <h5 class="text-secondary border-bottom border-secondary pb-2 mb-3"><i class="fas fa-users-cog me-2"></i>System
+        Administration</h5>
+    <div class="row g-3">
+        <!-- Register Faculty -->
+        <div class="col-6 col-md-3">
+            <a href="#" data-bs-toggle="offcanvas" data-bs-target="#registerFacultyOffcanvas"
+                class="text-decoration-none">
+                <div class="card shadow-sm h-100 border-0 bg-primary text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-user-plus fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Register Faculty</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Manage Users -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.manage_users') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-dark text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-users fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Manage Users</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- System Settings -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('admin.system_settings') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-light text-dark hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-sliders-h fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Settings</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <!-- Logout -->
+        <div class="col-6 col-md-3">
+            <a href="{{ url_for('auth.logout') }}" class="text-decoration-none load-page">
+                <div class="card shadow-sm h-100 border-0 bg-danger text-white hover-scale">
+                    <div class="card-body text-center d-flex flex-column align-items-center justify-content-center p-4">
+                        <i class="fas fa-sign-out-alt fa-2x mb-3"></i>
+                        <h6 class="fw-bold mb-0">Logout</h6>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<hr class="mb-4">
+
+<h4 class="mb-3 text-muted">📊 System Statistics</h4>
+<div class="row g-4 mb-4">
+    <!-- Stats Cards -->
+    <div class="col-md-3">
+        <div class="card shadow-sm border-left-primary h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2">Total Students</h6>
+                <h3 class="font-weight-bold mb-0">{{ total_students }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-left-success h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2">Total Faculty</h6>
+                <h3 class="font-weight-bold mb-0">{{ total_faculty }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-left-info h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2">Total Events</h6>
+                <h3 class="font-weight-bold mb-0">{{ total_events }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm border-left-warning h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-muted mb-2">Registrations</h6>
+                <h3 class="font-weight-bold mb-0">{{ total_registrations }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Analytics Section -->
+<div class="row mb-5">
+    <div class="col-md-12">
+        <div class="card glass-panel border-0 p-4">
+            <h4 class="mb-4 text-primary text-center"><i class="fas fa-chart-bar me-2"></i>Event Performance Analytics
+            </h4>
+            <div style="height: 400px; position: relative;">
+                <canvas id="eventChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Event Offcanvas (Bottom) -->
+<div class="offcanvas offcanvas-bottom h-100 glass-ui offcanvas-slow" tabindex="-1" id="createEventOffcanvas"
+    aria-labelledby="createEventOffcanvasLabel">
+    <div class="offcanvas-header border-bottom-0">
+        <h5 class="offcanvas-title fw-bold" id="createEventOffcanvasLabel"><i
+                class="fas fa-calendar-plus me-2 text-success"></i>Create New Event</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form method="POST" action="{{ url_for('admin.create_event') }}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Event Name</label>
+                                <input type="text" name="event_name" class="form-control" placeholder="Enter event name"
+                                    required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Event Date</label>
+                                <input type="date" name="event_date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Location</label>
+                                <input type="text" name="location" class="form-control" placeholder="Enter venue"
+                                    required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Coordinator</label>
+                                <select name="coordinator_id" class="form-select" required>
+                                    <option value="" selected disabled>Select Faculty</option>
+                                    {% if faculty_list %}
+                                    {% for faculty in faculty_list %}
+                                    <option value="{{ faculty.faculty_id }}">{{ faculty.name }} ({{ faculty.department
+                                        }})</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3"
+                                placeholder="Enter description"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">Create Event</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Register Faculty Offcanvas (Bottom) -->
+<div class="offcanvas offcanvas-bottom h-100 glass-ui offcanvas-slow" tabindex="-1" id="registerFacultyOffcanvas"
+    aria-labelledby="registerFacultyOffcanvasLabel">
+    <div class="offcanvas-header border-bottom-0">
+        <h5 class="offcanvas-title fw-bold" id="registerFacultyOffcanvasLabel"><i
+                class="fas fa-user-plus me-2 text-info"></i>Register New Faculty</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <form method="POST" action="{{ url_for('admin.register_faculty') }}">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" name="email" class="form-control" placeholder="Enter email address"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Department</label>
+                            <input type="text" name="department" class="form-control"
+                                placeholder="E.g. Computer Science" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control"
+                                placeholder="Assign temporary password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-info btn-lg text-white">Register Faculty</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui bg-dark text-white"> <!-- Dark theme for admin -->
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-key me-2 text-warning"></i>Change Password</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('auth.change_password') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">Current Password</label>
+                        <input type="password" name="current_password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">New Password</label>
+                        <input type="password" name="new_password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-control" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning fw-bold">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('admin-dashboard-bg');
+        var rawData = JSON.parse('{{ analytics_data | tojson }}');
+
+        if (rawData && rawData.length > 0) {
+            var labels = rawData.map(function (item) { return item.event_name; });
+            var registrations = rawData.map(function (item) { return item.total_reg; });
+            var attendance = rawData.map(function (item) { return item.attended || 0; });
+
+            var ctx = document.getElementById('eventChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Registrations',
+                            data: registrations,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Attendance',
+                            data: attendance,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        } else {
+            var container = document.getElementById('eventChart');
+            if (container) {
+                container.parentElement.innerHTML = '<div class="text-center py-5 text-muted">No event data available yet for analytics.</div>';
+            }
+        }
+    });
+</script>
+{% endblock %}

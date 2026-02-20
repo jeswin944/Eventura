@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}UCEAMS - Unified Campus System{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <!-- Ambient Floating Shapes -->
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+
+    <div class="hero-content">
+        <h1 class="hero-title">Unified Campus Event and <br> Academic Management System</h1>
+        <p class="hero-subtitle">
+            Your centralized hub for academic schedules, campus events, and interactions.<br>
+            Seamlessly discover, register, and manage university life in one place.
+        </p>
+
+        <div class="action-cards d-flex justify-content-center gap-4 flex-wrap mt-4">
+
+            <a href="{{ url_for('public.events') }}" class="card glass-panel text-decoration-none"
+                style="width: 200px; padding: 20px;">
+                <div class="card-body text-center p-0">
+                    <h2 class="mb-2">📅</h2>
+                    <h5 class="card-title text-white">Campus Events</h5>
+                    <p class="small text-secondary m-0">Seminars, workshops & culture</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('auth.login') }}" class="card glass-panel text-decoration-none"
+                style="width: 200px; padding: 20px;">
+                <div class="card-body text-center p-0">
+                    <h2 class="mb-2">🎓</h2>
+                    <h5 class="card-title text-white">Academic Portal</h5>
+                    <p class="small text-secondary m-0">Access your profile & grades</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('student.student_timetable') }}" class="card glass-panel text-decoration-none"
+                style="width: 200px; padding: 20px;">
+                <div class="card-body text-center p-0">
+                    <h2 class="mb-2">🗓️</h2>
+                    <h5 class="card-title text-white">My Schedule</h5>
+                    <p class="small text-secondary m-0">Timetables & exam dates</p>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container mt-5 mb-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="card glass-panel h-100 p-4 border-0 shadow-sm transition-hover">
+                <div class="mb-3">
+                    <div class="rounded-circle bg-white bg-opacity-10 d-inline-flex p-3">
+                        <i class="fas fa-layer-group fa-2x text-warning"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-white">Unified Dashboard</h5>
+                <p class="text-white-50 small">Academic grades, event registrations, and schedules—all in one secure
+                    place.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card glass-panel h-100 p-4 border-0 shadow-sm transition-hover">
+                <div class="mb-3">
+                    <div class="rounded-circle bg-white bg-opacity-10 d-inline-flex p-3">
+                        <i class="fas fa-graduation-cap fa-2x text-success"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-white">Digital Academics</h5>
+                <p class="text-white-50 small">View exam timetables, track attendance, and manage on-duty requests
+                    effortlessly.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card glass-panel h-100 p-4 border-0 shadow-sm transition-hover">
+                <div class="mb-3">
+                    <div class="rounded-circle bg-white bg-opacity-10 d-inline-flex p-3">
+                        <i class="fas fa-bell fa-2x text-info"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold text-white">Real-time Campus</h5>
+                <p class="text-white-50 small">Instant updates on class changes, event deadlines, and administrative
+                    announcements.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Section -->
+<div class="container mb-5">
+    <div class="card glass-panel border-0 p-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="fw-bold text-white mb-3">Why Choose UCEAMS?</h2>
+                <p class="text-white-50 lead mb-4">
+                    UCEAMS is designed to organize the ecosystem of campus life.
+                    Our integrated platform simplifies everything from academic schedules and exams
+                    to vibrant cultural event participation.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <div class="d-flex align-items-center text-white">
+                        <i class="fas fa-check-circle text-primary me-2"></i> Centralized Hub
+                    </div>
+                    <div class="d-flex align-items-center text-white">
+                        <i class="fas fa-check-circle text-primary me-2"></i> Real-time Updates
+                    </div>
+                    <div class="d-flex align-items-center text-white">
+                        <i class="fas fa-check-circle text-primary me-2"></i> Secure Data
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="rounded-4 p-4"
+                    style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    <i class="fas fa-university fa-5x text-white opacity-50 mb-3"></i>
+                    <h4 class="text-white">Empowering Campus Life</h4>
+                    <p class="text-white-50 small">Connecting over 500+ students and faculty members.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="calendar-section mt-5 mb-5 container">
+    <div class="card glass-panel p-4 border-0 shadow-lg" style="border-radius: 20px;">
+        <h3 class="text-white mb-4 text-center fw-bold"><i class="fas fa-calendar-alt me-2 text-primary"></i>Event
+            Calendar</h3>
+        <div id="calendar" class="text-white"
+            style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;"></div>
+    </div>
+</div>
+
+<!-- Location Section -->
+<section class="location-section">
+    <div class="container">
+        <h3>Our College Location</h3>
+        <p>Nirmala College of Engineering</p>
+
+        <div class="map-wrapper">
+            <img src="{{ url_for('static', filename='images/college.png') }}" alt="College Location Map"
+                class="map-image img-fluid">
+        </div>
+
+        <div class="map-link">
+            <a href="https://maps.google.com/?q=Nirmala+College+of+Engineering" target="_blank" class="btn-map">
+                <i class="fas fa-map-marker-alt me-2"></i> View Live Location on Google Maps
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <p>&copy; 2026 EventEase. All Rights Reserved.</p>
+</footer>
+
+<!-- FullCalendar CSS and JS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<style>
+    /* Customize FullCalendar Colors */
+    .fc {
+        --fc-border-color: rgba(255, 255, 255, 0.1);
+        --fc-today-bg-color: rgba(67, 97, 238, 0.2);
+    }
+
+    .fc-event {
+        cursor: pointer;
+        padding: 4px 8px;
+        font-weight: 500;
+        background: #4361ee !important;
+        border: none !important;
+        border-radius: 6px !important;
+    }
+
+    .fc-toolbar-title {
+        color: white !important;
+    }
+
+    .fc-col-header-cell-cushion,
+    .fc-daygrid-day-number {
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+    .fc-button-primary {
+        background-color: #4361ee !important;
+        border: none !important;
+        box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3) !important;
+    }
+
+    .fc-button-primary:hover {
+        background-color: #3a56d4 !important;
+    }
+</style>
+
+<!-- Event Data for Calendar -->
+<script id="calendar-events-data" type="application/json">
+    [
+        {% for event in events %}
+        {
+            "id": "{{ event.event_id }}",
+            "title": {{ event.event_name|tojson }},
+            "start": "{{ event.event_date }}",
+            "extendedProps": {
+                "description": {{ event.description|tojson }},
+                "location": {{ event.location|tojson }},
+                "is_registered": {{ 'true' if event.is_registered else 'false' }}
+            }
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.body.classList.add('home-bg');
+        var calendarEl = document.getElementById('calendar');
+        var eventsData = JSON.parse(document.getElementById('calendar-events-data').textContent);
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            fixedWeekCount: false,
+            events: eventsData,
+            eventClick: function (info) {
+                const event = info.event;
+                const props = event.extendedProps;
+
+                // Populate Detail Modal
+                document.getElementById('detailModalTitle').textContent = event.title;
+                document.getElementById('detailModalDate').textContent = event.start.toLocaleDateString();
+                document.getElementById('detailModalLocation').textContent = props.location;
+                document.getElementById('detailModalDescription').textContent = props.description;
+
+                // Handle Buttons dynamically
+                const btnContainer = document.getElementById('modalActionContainer');
+                const userRole = "{{ session.get('role', '') }}";
+
+                if (!userRole) {
+                    btnContainer.innerHTML = `<a href="{{ url_for('auth.login') }}" class="btn btn-primary">Login to Register</a>`;
+                } else if (userRole === 'student') {
+                    if (props.is_registered) {
+                        btnContainer.innerHTML = `<a href="{{ url_for('student.student_dashboard') }}" class="btn btn-success"><i class="fas fa-check-circle me-1"></i> Already Registered - View Dashboard</a>`;
+                    } else {
+                        btnContainer.innerHTML = `<a href="{{ url_for('student.student_dashboard') }}" class="btn btn-primary">Register Now in Dashboard</a>`;
+                    }
+                } else {
+                    btnContainer.innerHTML = `<button class="btn btn-secondary" disabled>Faculty/Admin View Only</button>`;
+                }
+
+                var detailModal = new bootstrap.Modal(document.getElementById('calendarEventDetailModal'));
+                detailModal.show();
+            }
+        });
+        calendar.render();
+    });
+</script>
+
+<!-- Calendar Event Detail Modal -->
+<div class="modal fade" id="calendarEventDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui text-white">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="detailModalTitle"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong><i class="fas fa-calendar-alt me-2 text-primary"></i>Date:</strong> <span
+                        id="detailModalDate"></span></p>
+                <p><strong><i class="fas fa-map-marker-alt me-2 text-primary"></i>Location:</strong> <span
+                        id="detailModalLocation"></span></p>
+                <p><strong><i class="fas fa-info-circle me-2 text-primary"></i>Description:</strong></p>
+                <p id="detailModalDescription" class="text-secondary small"></p>
+
+                <div class="d-grid mt-4" id="modalActionContainer">
+                    <!-- Dynamic button will be inserted here by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,661 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold text-white mb-0"><i class="fas fa-graduation-cap me-2"></i>Student Dashboard</h3>
+        <div class="d-flex align-items-center gap-3">
+            <div class="text-white-50">
+                Welcome, <strong>{{ session.get('name', 'Student') }}</strong>
+            </div>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end glass-panel border-0 shadow">
+                    <li><a class="dropdown-item text-white" href="#" data-bs-toggle="modal"
+                            data-bs-target="#changePasswordModal"><i class="fas fa-key me-2"></i>Change Password</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider bg-white opacity-25">
+                    </li>
+                    <li><a class="dropdown-item text-white" href="{{ url_for('auth.logout') }}"><i
+                                class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-4">
+            <div class="card glass-panel border-0 shadow-sm h-100 text-white">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3">
+                        <i class="fas fa-clipboard-list fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase mb-1 small opacity-75">Registered Events</h6>
+                        <h3 class="fw-bold mb-0">{{ total_registered }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card glass-panel border-0 shadow-sm h-100 text-white">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3">
+                        <i class="fas fa-check-circle fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase mb-1 small opacity-75">Events Attended</h6>
+                        <h3 class="fw-bold mb-0">{{ attended_count }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card glass-panel border-0 shadow-sm h-100 text-white">
+                <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3">
+                        <i class="fas fa-percentage fa-2x"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-uppercase mb-1 small opacity-75">Participation Rate</h6>
+                        <h3 class="fw-bold mb-0">{{ participation_rate }}%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Layout Grid -->
+    <div class="row g-4">
+        <!-- Left Column: Registrations Table -->
+        <div class="col-lg-8">
+            <div class="card glass-panel border-0 shadow-lg h-100">
+                <div
+                    class="card-header bg-transparent border-0 d-flex justify-content-between align-items-center pt-4 px-4 pb-2">
+                    <h5 class="fw-bold text-white mb-0"><i class="fas fa-list-alt me-2 text-info"></i>My Registrations
+                    </h5>
+                    <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#historyModal">
+                        <i class="fas fa-history me-1"></i>View History
+                    </button>
+                </div>
+                <div class="card-body p-4 pt-2">
+                    {% if registrations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover text-white align-middle">
+                            <thead class="table-dark bg-transparent">
+                                <tr>
+                                    <th>Event</th>
+                                    <th>Date</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in registrations %}
+                                <tr>
+                                    <td class="fw-bold">{{ r.event_name }}</td>
+                                    <td>{{ r.event_date }}</td>
+                                    <td><small>{{ r.location }}</small></td>
+                                    <td>
+                                        {% if r.attendance == 'Present' %}
+                                        <span class="badge bg-success">Attended</span>
+                                        {% else %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="d-flex gap-2 align-items-center justify-content-center">
+                                            {% if r.can_cancel %}
+                                            <button class="btn btn-sm btn-danger text-white cancel-reg-btn"
+                                                data-href="{{ url_for('student.cancel_registration', reg_id=r.registration_id) }}"
+                                                data-event-name="{{ r.event_name }}" title="Cancel Registration">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                            {% if r.certificate_status == 'Approved' %}
+                                            <a href="{{ url_for('student.download_certificate', reg_id=r.registration_id) }}"
+                                                class="btn btn-sm btn-primary" title="Download Certificate">
+                                                <i class="fas fa-download"></i>
+                                            </a>
+                                            {% elif r.certificate_status == 'Pending' %}
+                                            <span class="badge bg-info text-dark" title="Certificate Processing"><i
+                                                    class="fas fa-cog fa-spin"></i></span>
+                                            {% else %}
+                                            <span class="text-muted small">-</span>
+                                            {% endif %}
+
+                                            {% if r.attendance == 'Present' %}
+                                            <!-- Feedback -->
+                                            {% if r.feedback_count > 0 %}
+                                            <button class="btn btn-sm btn-secondary" disabled title="Already Rated">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            {% else %}
+                                            <button class="btn btn-sm btn-warning text-dark" data-bs-toggle="modal"
+                                                data-bs-target="#feedbackModal" data-event-id="{{ r.event_id }}"
+                                                data-event-name="{{ r.event_name }}" title="Rate Event">
+                                                <i class="fas fa-star"></i>
+                                            </button>
+                                            {% endif %}
+
+                                            <!-- On-Duty -->
+                                            {% if r.od_status == 'Approved' %}
+                                            <span class="badge bg-success" title="On-Duty Approved">OD: Approved</span>
+                                            {% elif r.od_status == 'Rejected' %}
+                                            <span class="badge bg-danger" title="On-Duty Rejected">OD: Rejected</span>
+                                            {% elif r.od_status == 'Pending' %}
+                                            <span class="badge bg-warning text-dark" title="On-Duty Pending">OD:
+                                                Pending</span>
+                                            {% else %}
+                                            <a href="{{ url_for('student.request_onduty', reg_id=r.registration_id) }}"
+                                                class="btn btn-sm btn-info text-white load-page"
+                                                title="Request On-Duty">
+                                                <i class="fas fa-file-contract"></i> OD
+                                            </a>
+                                            {% endif %}
+                                            {% else %}
+                                            <button class="btn btn-sm btn-outline-secondary" disabled
+                                                title="Mark Attendance to Unlock OD">
+                                                <i class="fas fa-lock"></i> OD
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-calendar-times fa-3x mb-3 opacity-50"></i>
+                        <p>No active registrations found.</p>
+                        <button class="btn btn-primary mt-2" type="button" data-bs-toggle="offcanvas"
+                            data-bs-target="#registerEventOffcanvas">
+                            Browse Events
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Actions & Calendar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card glass-panel border-0 shadow-lg mb-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-white mb-3">Quick Actions</h5>
+                    <button
+                        class="btn btn-light w-100 py-2 d-flex align-items-center justify-content-center fw-bold text-primary"
+                        type="button" data-bs-toggle="offcanvas" data-bs-target="#registerEventOffcanvas">
+                        <i class="fas fa-calendar-plus me-2"></i>Register for Event
+                    </button>
+                    <a href="{{ url_for('student.student_timetable') }}"
+                        class="btn btn-light w-100 py-2 d-flex align-items-center justify-content-center fw-bold text-primary mt-2 load-page">
+                        <i class="fas fa-calendar-alt me-2"></i> View Timetable
+                    </a>
+                    <a href="{{ url_for('student.student_exams') }}"
+                        class="btn btn-light w-100 py-2 d-flex align-items-center justify-content-center fw-bold text-primary mt-2 load-page">
+                        <i class="fas fa-file-alt me-2"></i> View Exam Schedule
+                    </a>
+                </div>
+            </div>
+
+            <!-- Calendar Widget -->
+            <div class="card glass-panel border-0 shadow-lg">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold text-white mb-3 ps-2"><i
+                            class="fas fa-calendar-alt me-2 text-warning"></i>Schedule</h6>
+                    <div id="calendar" class="small-calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FullCalendar CSS and JS -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+
+<style>
+    /* FullCalendar Customization */
+    .fc {
+        color: var(--bs-body-color);
+        --fc-border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    [data-bs-theme="dark"] .fc {
+        --fc-border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .fc-event {
+        cursor: pointer;
+        padding: 4px 8px;
+        font-weight: 500;
+        background: #4361ee !important;
+        border: none !important;
+        border-radius: 6px !important;
+    }
+
+    .fc-toolbar-title {
+        font-weight: bold;
+    }
+
+    .fc-col-header-cell-cushion,
+    .fc-daygrid-day-number {
+        text-decoration: none !important;
+        color: inherit !important;
+    }
+
+    .fc-button-primary {
+        background-color: #4361ee !important;
+        border: none !important;
+    }
+
+    /* Modal Backdrop Blur */
+    .modal.fade.show {
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        background: rgba(0, 0, 0, 0.4);
+    }
+</style>
+
+<!-- Event Data for Calendar -->
+<script id="calendar-events-data" type="application/json">
+    [
+        {% for event in events %}
+        {
+            "id": "{{ event.event_id }}",
+            "title": {{ event.event_name|tojson }},
+            "start": "{{ event.event_date }}",
+            "extendedProps": {
+                "description": {{ event.description|tojson }},
+                "location": {{ event.location|tojson }},
+                "is_registered": {{ 'true' if event.is_registered else 'false' }}
+            }
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var eventsData = JSON.parse(document.getElementById('calendar-events-data').textContent);
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            fixedWeekCount: false,
+            events: eventsData,
+            eventClick: function (info) {
+                const event = info.event;
+                const props = event.extendedProps;
+
+                // Populate Detail Modal
+                document.getElementById('detailModalTitle').textContent = event.title;
+                document.getElementById('detailModalDate').textContent = event.start.toLocaleDateString();
+                document.getElementById('detailModalLocation').textContent = props.location;
+                document.getElementById('detailModalDescription').textContent = props.description;
+
+                // Show/Hide Register Button based on registration status
+                const regBtn = document.getElementById('calendarRegisterBtn');
+                if (props.is_registered) {
+                    regBtn.classList.add('d-none');
+                    document.getElementById('alreadyRegisteredNote').classList.remove('d-none');
+                } else {
+                    regBtn.classList.remove('d-none');
+                    document.getElementById('alreadyRegisteredNote').classList.add('d-none');
+                    // Setup register button to open the existing registration modal
+                    regBtn.onclick = () => {
+                        const registerModal = new bootstrap.Modal(document.getElementById('eventRegisterModal'));
+                        // Setup the registration modal data
+                        document.getElementById('modalEventName').textContent = event.title;
+                        document.getElementById('registrationForm').action = `/register-event/${event.id}`;
+
+                        bootstrap.Modal.getInstance(document.getElementById('calendarEventDetailModal')).hide();
+                        registerModal.show();
+                    };
+                }
+
+                var detailModal = new bootstrap.Modal(document.getElementById('calendarEventDetailModal'));
+                detailModal.show();
+            }
+        });
+        calendar.render();
+    });
+</script>
+
+<!-- Calendar Event Detail Modal -->
+<div class="modal fade" id="calendarEventDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="detailModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong><i class="fas fa-calendar-alt me-2"></i>Date:</strong> <span id="detailModalDate"></span></p>
+                <p><strong><i class="fas fa-map-marker-alt me-2"></i>Location:</strong> <span
+                        id="detailModalLocation"></span></p>
+                <p><strong><i class="fas fa-info-circle me-2"></i>Description:</strong></p>
+                <p id="detailModalDescription" class="text-muted"></p>
+
+                <div class="d-grid mt-4">
+                    <button id="calendarRegisterBtn" class="btn btn-primary">Register Now</button>
+                    <p id="alreadyRegisteredNote" class="text-success text-center d-none fw-bold"><i
+                            class="fas fa-check-circle me-1"></i> You are registered!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Register Event Offcanvas (Bottom) -->
+<div class="offcanvas offcanvas-bottom h-100 glass-ui offcanvas-slow" tabindex="-1" id="registerEventOffcanvas"
+    aria-labelledby="registerEventOffcanvasLabel">
+    <div class="offcanvas-header border-bottom-0">
+        <h5 class="offcanvas-title fw-bold" id="registerEventOffcanvasLabel"><i
+                class="fas fa-calendar-alt me-2 text-primary"></i>Available
+            Events</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div class="container">
+            <div class="row">
+                {% if events %}
+                {% for event in events %}
+                <div class="col-md-6 mb-3">
+                    <div class="card glass-ui border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ event.event_name }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ event.event_date }} | {{ event.location }}</h6>
+                            <p class="card-text">{{ event.description }}</p>
+
+                            {% if event.is_registered %}
+                            <button class="btn btn-secondary w-100" disabled>Already Registered</button>
+                            {% else %}
+                            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal"
+                                data-bs-target="#eventRegisterModal" data-event-id="{{ event.event_id }}"
+                                data-event-name="{{ event.event_name }}">
+                                Register Now
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">No upcoming events available for registration.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event History Modal -->
+<div class="modal fade" id="historyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-ui">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-history me-2 text-primary"></i>Participation History
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">You have participated in <span class="fw-bold text-success">{{ attended_count
+                        }}</span> events in the past.</p>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Date</th>
+                                <th>Location</th>
+                                <th>Attendance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in registrations %}
+                            <tr>
+                                <td>{{ r.event_name }}</td>
+                                <td>{{ r.event_date }}</td>
+                                <td>{{ r.location }}</td>
+                                <td>
+                                    {% if r.attendance == 'Present' %}
+                                    <span class="badge bg-success">Attended</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Not Marked</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% if not registrations %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No history found.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Registration Modal -->
+<div class="modal fade" id="eventRegisterModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Register for <span id="modalEventName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registrationForm" method="POST" action="">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ session.get('name', '') }}"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Register Number</label>
+                        <input type="text" name="register_number" class="form-control" placeholder="Enter Reg No"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Semester</label>
+                        <select name="semester" class="form-select" required>
+                            <option value="" selected disabled>Select Semester</option>
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Confirm Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Rate Event: <span id="feedbackEventName" class="text-primary"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm" method="POST" action="/submit-feedback">
+                    <input type="hidden" name="event_id" id="feedbackEventId">
+
+                    <div class="mb-4 text-center">
+                        <label class="form-label d-block fw-bold mb-2">How was your experience?</label>
+                        <div class="d-flex justify-content-center gap-2">
+                            <input type="radio" class="btn-check" name="rating" id="rating5" value="5" checked>
+                            <label class="btn btn-outline-warning" for="rating5">5 <i class="fas fa-star"></i></label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating4" value="4">
+                            <label class="btn btn-outline-warning" for="rating4">4 <i class="fas fa-star"></i></label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating3" value="3">
+                            <label class="btn btn-outline-warning" for="rating3">3 <i class="fas fa-star"></i></label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating2" value="2">
+                            <label class="btn btn-outline-warning" for="rating2">2 <i class="fas fa-star"></i></label>
+
+                            <input type="radio" class="btn-check" name="rating" id="rating1" value="1">
+                            <label class="btn btn-outline-warning" for="rating1">1 <i class="fas fa-star"></i></label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Comments</label>
+                        <textarea name="comments" class="form-control" rows="3"
+                            placeholder="Share your thoughts about the event..." required></textarea>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Registration Modal -->
+<div class="modal fade" id="cancelRegistrationModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui text-center p-4 border-0">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <i class="fas fa-exclamation-circle fa-5x text-danger"></i>
+                </div>
+                <h4 class="mt-3 fw-bold text-danger">Cancel Registration?</h4>
+                <p class="mb-4 text-muted">Are you sure you want to cancel your registration for <strong
+                        id="cancelEventName"></strong>?</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep It</button>
+                    <a id="confirmCancelBtn" href="#" class="btn btn-danger">Yes, Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-white"><i class="fas fa-key me-2 text-warning"></i>Change Password
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('auth.change_password') }}">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">Current Password</label>
+                        <input type="password" name="current_password" class="form-control glass-input text-white"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">New Password</label>
+                        <input type="password" name="new_password" class="form-control glass-input text-white" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small fw-bold">Confirm New Password</label>
+                        <input type="password" name="confirm_password" class="form-control glass-input text-white"
+                            required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning fw-bold">Update Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Apply Dashboard Background
+        document.body.classList.add('student-dashboard-bg');
+
+        // Register Event Modal Logic
+        const registerModal = document.getElementById('eventRegisterModal');
+        if (registerModal) {
+            registerModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const eventId = button.getAttribute('data-event-id');
+                const eventName = button.getAttribute('data-event-name');
+
+                const modalTitle = document.getElementById('modalEventName');
+                if (modalTitle) modalTitle.textContent = eventName;
+
+                const form = document.getElementById('registrationForm');
+                if (form) form.action = `/register-event/${eventId}`;
+            });
+        }
+
+        // Feedback Modal Logic
+        const feedbackModal = document.getElementById('feedbackModal');
+        if (feedbackModal) {
+            feedbackModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const eventId = button.getAttribute('data-event-id');
+                const eventName = button.getAttribute('data-event-name');
+
+                const modalTitle = document.getElementById('feedbackEventName');
+                if (modalTitle) modalTitle.textContent = eventName;
+
+                const inputId = document.getElementById('feedbackEventId');
+                if (inputId) inputId.value = eventId;
+            });
+        }
+
+        // Cancel Registration Modal Logic
+        const cancelBtns = document.querySelectorAll('.cancel-reg-btn');
+        cancelBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const href = this.getAttribute('data-href');
+                const name = this.getAttribute('data-event-name');
+                const confirmBtn = document.getElementById('confirmCancelBtn');
+                const nameSpan = document.getElementById('cancelEventName');
+
+                if (confirmBtn) confirmBtn.href = href;
+                if (nameSpan) nameSpan.textContent = name;
+
+                const modalEl = document.getElementById('cancelRegistrationModal');
+                if (modalEl) {
+                    new bootstrap.Modal(modalEl).show();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Master Timetable{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-8">
+        <h2><i class="fas fa-calendar-alt me-2"></i>Master Timetable Management</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSlotModal">
+            <i class="fas fa-plus me-1"></i> Assign New Slot
+        </button>
+    </div>
+</div>
+
+<!-- Timetable View -->
+<div class="card shadow-sm glass-ui">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Course</th>
+                        <th>Department</th>
+                        <th>Faculty</th>
+                        <th>Classroom</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in timetable %}
+                    <tr>
+                        <td>{{ slot.day }}</td>
+                        <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                        <td>{{ slot.course_name }}</td>
+                        <td>{{ slot.department }} (Sem {{ slot.semester }})</td>
+                        <td>{{ slot.faculty_name }}</td>
+                        <td>{{ slot.classroom }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.delete_timetable_slot_admin', slot_id=slot.timetable_id) }}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Delete this schedule?');">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center">No schedules found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Slot Modal -->
+<div class="modal fade" id="addSlotModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui text-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Assign Class Slot</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('admin.manage_timetable') }}" method="POST">
+
+                    <div class="mb-3">
+                        <label class="form-label">Course</label>
+                        <select name="course_id" class="form-select" required>
+                            <option value="">Select Course...</option>
+                            {% for c in courses %}
+                            <option value="{{ c.course_id }}">{{ c.course_name }} ({{ c.department }} - Sem {{
+                                c.semester }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Faculty</label>
+                        <select name="faculty_id" class="form-select" required>
+                            <option value="">Select Faculty...</option>
+                            {% for f in faculty_list %}
+                            <option value="{{ f.faculty_id }}">{{ f.name }} ({{ f.department }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Day</label>
+                        <select name="day" class="form-select" required>
+                            <option value="Monday">Monday</option>
+                            <option value="Tuesday">Tuesday</option>
+                            <option value="Wednesday">Wednesday</option>
+                            <option value="Thursday">Thursday</option>
+                            <option value="Friday">Friday</option>
+                            <option value="Saturday">Saturday</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Time</label>
+                            <input type="time" name="start_time" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Time</label>
+                            <input type="time" name="end_time" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Classroom</label>
+                        <input type="text" name="classroom" class="form-control" placeholder="e.g. Room 305" required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Assign Schedule</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

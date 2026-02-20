@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Events{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">Upcoming Events</h3>
+
+{% if events %}
+{% for event in events %}
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h5>{{ event.event_name }}</h5>
+                <p>
+                    <strong>Date:</strong> {{ event.event_date }} <br>
+                    <strong>Location:</strong> {{ event.location }} <br>
+                    {{ event.description }}
+                </p>
+            </div>
+            {% if session.get('role') == 'faculty' %}
+            <div class="d-flex align-items-center">
+                <a href="{{ url_for('faculty.scan_attendance') }}" class="btn btn-sm btn-warning me-1">
+                    <i class="fas fa-qrcode me-1"></i> Scan
+                </a>
+
+                {% if session.get('is_admin') %}
+                {% if event.status == 'Closed' %}
+                <a href="{{ url_for('admin.toggle_event_status', event_id=event.event_id, new_status='Open') }}"
+                    class="btn btn-sm btn-outline-success me-1">
+                    <i class="fas fa-lock-open"></i> Open
+                </a>
+                {% else %}
+                <a href="{{ url_for('admin.toggle_event_status', event_id=event.event_id, new_status='Closed') }}"
+                    class="btn btn-sm btn-outline-dark me-1">
+                    <i class="fas fa-lock"></i> Close
+                </a>
+                {% endif %}
+
+                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#deleteEventModal" data-event-id="{{ event.event_id }}"
+                    data-event-name="{{ event.event_name }}">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if session.get('role') == 'student' %}
+            <div>
+                {% if event.status == 'Closed' %}
+                <button class="btn btn-sm btn-secondary" disabled>
+                    <i class="fas fa-ban me-1"></i> Registration Closed
+                </button>
+                {% elif event.deadline_passed %}
+                <button class="btn btn-sm btn-danger" disabled>
+                    <i class="fas fa-clock me-1"></i> Deadline Passed
+                </button>
+                {% elif event.is_registered %}
+                <button class="btn btn-sm btn-success" disabled>
+                    <i class="fas fa-check-circle me-1"></i> Registered
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#eventRegisterModal" data-event-id="{{ event.event_id }}"
+                    data-event-name="{{ event.event_name }}">
+                    Register Now
+                </button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Pagination Controls -->
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <!-- Previous Button -->
+        {% if page > 1 %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('public.events', page=page-1) }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo; Previous</span>
+            </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+            <span class="page-link">&laquo; Previous</span>
+        </li>
+        {% endif %}
+
+        <!-- Page Info -->
+        <li class="page-item disabled"><span class="page-link">Page {{ page }} of {{ total_pages }}</span></li>
+
+        <!-- Next Button -->
+        {% if page < total_pages %} <li class="page-item">
+            <a class="page-link" href="{{ url_for('public.events', page=page+1) }}" aria-label="Next">
+                <span aria-hidden="true">Next &raquo;</span>
+            </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">Next &raquo;</span>
+            </li>
+            {% endif %}
+    </ul>
+</nav>
+
+<!-- Event Registration Modal -->
+<div class="modal fade" id="eventRegisterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-ui text-dark">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Register for <span id="modalEventName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registrationForm" method="POST" action="">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ session.get('name', '') }}"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Register Number</label>
+                        <input type="text" name="register_number" class="form-control" placeholder="Enter Reg No"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="Enter Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Semester</label>
+                        <select name="semester" class="form-select" required>
+                            <option value="" selected disabled>Select Semester</option>
+                            <option value="1">1st Semester</option>
+                            <option value="2">2nd Semester</option>
+                            <option value="3">3rd Semester</option>
+                            <option value="4">4th Semester</option>
+                            <option value="5">5th Semester</option>
+                            <option value="6">6th Semester</option>
+                            <option value="7">7th Semester</option>
+                            <option value="8">8th Semester</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Confirm Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const registerModal = document.getElementById('eventRegisterModal');
+        if (registerModal) {
+            registerModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const eventId = button.getAttribute('data-event-id');
+                const eventName = button.getAttribute('data-event-name');
+
+                // Update Modal Title
+                document.getElementById('modalEventName').textContent = eventName;
+
+                // Update Form Action
+                const form = document.getElementById('registrationForm');
+                form.action = `/register-event/${eventId}`;
+            });
+        }
+    });
+</script>
+
+<!-- Delete Event Confirmation Modal -->
+<div class="modal fade" id="deleteEventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the event <strong id="deleteEventName"></strong>?</p>
+                <p class="text-danger"><small>This will also remove all registrations and attendance records for this
+                        event. This action cannot be undone.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="deleteEventBtn" href="#" class="btn btn-danger load-page">
+                    <i class="fas fa-trash-alt me-1"></i> Delete Event
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const deleteModal = document.getElementById('deleteEventModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', event => {
+                const button = event.relatedTarget;
+                const eventId = button.getAttribute('data-event-id');
+                const eventName = button.getAttribute('data-event-name');
+
+                document.getElementById('deleteEventName').textContent = eventName;
+                document.getElementById('deleteEventBtn').href = `/admin/delete-event/${eventId}`;
+            });
+        }
+    });
+</script>
+{% else %}
+<div class="alert alert-info text-center">
+    No events available.
+</div>
+{% endif %}
+{% endblock %}

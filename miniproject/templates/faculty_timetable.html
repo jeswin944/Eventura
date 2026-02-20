@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}My Timetable{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-calendar-alt me-2"></i>My Timetable</h2>
+    </div>
+</div>
+
+<div class="card shadow-sm glass-ui">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Course Name</th>
+                        <th>Semester</th>
+                        <th>Department</th>
+                        <th>Time</th>
+                        <th>Classroom</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in timetable %}
+                    <tr>
+                        <td>{{ slot.day }}</td>
+                        <td>{{ slot.course_name }}</td>
+                        <td>{{ slot.semester }}</td>
+                        <td>{{ slot.department }}</td>
+                        <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                        <td>{{ slot.classroom }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center">No classes scheduled yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

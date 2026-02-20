@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Admin: On-Duty Management{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2 class="text-primary"><i class="fas fa-user-check me-2"></i>Manage On-Duty Requests</h2>
+        <p class="text-muted">Review and approve On-Duty requests for all departments.</p>
+    </div>
+</div>
+
+<div class="card shadow-sm glass-ui">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student Details</th>
+                        <th>Event Details</th>
+                        <th>Participation Check</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in requests %}
+                    <tr>
+                        <td>
+                            <div class="fw-bold">{{ req.student_name }}</div>
+                            <small class="text-muted">{{ req.register_number }}</small>
+                            <br>
+                            <span class="badge bg-secondary">{{ req.department }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ req.event_name }}</div>
+                            <small>{{ req.event_date }}</small>
+                        </td>
+                        <td>
+                            <!-- System guarantees attendance for request, so explicitly show it -->
+                            <span class="badge bg-info text-dark">
+                                <i class="fas fa-check-circle me-1"></i> Verified Present
+                            </span>
+                        </td>
+                        <td>
+                            {% if req.status == 'Pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif req.status == 'Approved' %}
+                            <span class="badge bg-success">Approved</span>
+                            {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if req.status == 'Pending' %}
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin.approve_onduty', req_id=req.request_id, action='approve') }}"
+                                    class="btn btn-sm btn-success" title="Approve">
+                                    <i class="fas fa-check"></i> Approve
+                                </a>
+                                <a href="{{ url_for('admin.approve_onduty', req_id=req.request_id, action='reject') }}"
+                                    class="btn btn-sm btn-danger" title="Reject">
+                                    <i class="fas fa-times"></i> Reject
+                                </a>
+                            </div>
+                            {% else %}
+                            <span class="text-muted small">Processed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">No pending On-Duty requests found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
